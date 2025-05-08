@@ -1,8 +1,0 @@
-com\example\backend\config\JerseyConfig.class
-com\example\Main.class
-com\example\backend\config\ApplicationConfig.class
-com\example\backend\service\BookService.class
-com\example\backend\Application.class
-com\example\backend\model\Book.class
-com\example\backend\repository\BookRepository.class
-com\example\backend\rest\BookResource.class
