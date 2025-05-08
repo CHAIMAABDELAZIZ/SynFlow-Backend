@@ -1,11 +1,21 @@
 package com.example.backend.rest;
 
+import org.springframework.stereotype.Component;
+
+import com.example.backend.model.ApiResponse;
 import com.example.backend.model.Book;
 import com.example.backend.service.BookService;
-import jakarta.ws.rs.*;
+
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import org.springframework.stereotype.Component;
 
 @Component
 @Path("/books")
@@ -21,21 +31,26 @@ public class BookResource {
 
     @GET
     public Response getAllBooks() {
-        return Response.ok(bookService.findAll()).build();
+        return Response.ok(new ApiResponse<>(true, bookService.findAll(), "Books fetched successfully")).build();
     }
 
     @GET
     @Path("/{id}")
     public Response getBook(@PathParam("id") Long id) {
         return bookService.findById(id)
-                .map(book -> Response.ok(book).build())
-                .orElse(Response.status(Response.Status.NOT_FOUND).build());
+                .map(book -> Response.ok(new ApiResponse<>(true, book, 
+                    String.format("Book with ID %d fetched successfully", id))).build())
+                .orElse(Response.status(Response.Status.NOT_FOUND)
+                        .entity(new ApiResponse<>(false, null, 
+                            String.format("Book with ID %d not found", id))).build());
     }
 
     @POST
     public Response createBook(Book book) {
+        Book created = bookService.create(book);
         return Response.status(Response.Status.CREATED)
-                .entity(bookService.create(book))
+                .entity(new ApiResponse<>(true, created, 
+                    String.format("Book created successfully with ID %d", created.getId())))
                 .build();
     }
 
@@ -43,15 +58,21 @@ public class BookResource {
     @Path("/{id}")
     public Response updateBook(@PathParam("id") Long id, Book book) {
         return bookService.update(id, book)
-                .map(updated -> Response.ok(updated).build())
-                .orElse(Response.status(Response.Status.NOT_FOUND).build());
+                .map(updated -> Response.ok(new ApiResponse<>(true, updated, 
+                    String.format("Book with ID %d updated successfully", id))).build())
+                .orElse(Response.status(Response.Status.NOT_FOUND)
+                        .entity(new ApiResponse<>(false, null, 
+                            String.format("Book with ID %d not found", id))).build());
     }
 
     @DELETE
     @Path("/{id}")
     public Response deleteBook(@PathParam("id") Long id) {
-        return bookService.delete(id) 
-                ? Response.noContent().build() 
-                : Response.status(Response.Status.NOT_FOUND).build();
+        return bookService.delete(id)
+                ? Response.ok(new ApiResponse<>(true, null, 
+                    String.format("Book with ID %d deleted successfully", id))).build()
+                : Response.status(Response.Status.NOT_FOUND)
+                        .entity(new ApiResponse<>(false, null, 
+                            String.format("Book with ID %d not found", id))).build();
     }
 }
