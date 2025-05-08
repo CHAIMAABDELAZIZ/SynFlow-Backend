@@ -55,7 +55,7 @@ public class BookResource {
     }
 
     @PUT
-    @Path("/{id}")
+    @Path("/{id}")  
     public Response updateBook(@PathParam("id") Long id, Book book) {
         return bookService.update(id, book)
                 .map(updated -> Response.ok(new ApiResponse<>(true, updated, 
