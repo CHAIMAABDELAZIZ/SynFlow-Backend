@@ -6,8 +6,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -64,8 +62,8 @@ public class Utilisateur {
     @JsonIgnore
     private String password;
     
-    @Enumerated(EnumType.STRING)
-    private Role role;
+    @Column(length = 20)
+    private String role;
     
     private LocalDateTime created_at;
     
@@ -115,11 +113,11 @@ public class Utilisateur {
     }
     
     public Role getRole() {
-        return role;
+        return role != null ? Role.valueOf(role) : null;
     }
     
     public void setRole(Role role) {
-        this.role = role;
+        this.role = role != null ? role.name() : null;
     }
     
     public LocalDateTime getCreated_at() {

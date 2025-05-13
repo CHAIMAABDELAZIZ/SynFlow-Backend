@@ -4,8 +4,6 @@ import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -18,26 +16,24 @@ import jakarta.persistence.Table;
 public class Activite {
     
     public enum Type {
-        CREATION("Création"),
-        MODIFICATION("Modification"),
-        SUPPRESSION("Suppression"),
-        CONSULTATION("Consultation"),
-        VALIDATION("Validation"),
-        RESOLUTION_PROBLEME("Résolution de problème"),
-        COMMENTAIRE("Commentaire"),
-        MESURE("Prise de mesure"),
-        CONNEXION("Connexion"),
-        DECONNEXION("Déconnexion"),
-        AUTRE("Autre");
-        
-        private final String label;
-        
-        Type(String label) {
-            this.label = label;
-        }
+        CREATION, MODIFICATION, SUPPRESSION, CONSULTATION, VALIDATION, 
+        RESOLUTION_PROBLEME, COMMENTAIRE, MESURE, CONNEXION, DECONNEXION, AUTRE;
         
         public String getLabel() {
-            return label;
+            switch(this) {
+                case CREATION: return "Création";
+                case MODIFICATION: return "Modification";
+                case SUPPRESSION: return "Suppression";
+                case CONSULTATION: return "Consultation";
+                case VALIDATION: return "Validation";
+                case RESOLUTION_PROBLEME: return "Résolution de problème";
+                case COMMENTAIRE: return "Commentaire";
+                case MESURE: return "Prise de mesure";
+                case CONNEXION: return "Connexion";
+                case DECONNEXION: return "Déconnexion";
+                case AUTRE: return "Autre";
+                default: return name();
+            }
         }
         
         public static Type fromLabel(String label) {
@@ -51,27 +47,25 @@ public class Activite {
     }
     
     public enum TypeEntite {
-        REGION("Region"),
-        PUIT("Puit"),
-        FORAGE("Forage"),
-        PHASE("Phase"),
-        OPERATION("Operation"),
-        TYPE_OPERATION("Type d'opération"),
-        TYPE_INDICATEUR("Type d'indicateur"),
-        INDICATEUR("Indicateur"),
-        PROBLEME("Problème"),
-        UTILISATEUR("Utilisateur"),
-        RESERVOIR("Reservoir"),
-        AUTRE("Autre");
-        
-        private final String label;
-        
-        TypeEntite(String label) {
-            this.label = label;
-        }
+        REGION, PUIT, FORAGE, PHASE, OPERATION, TYPE_OPERATION, 
+        TYPE_INDICATEUR, INDICATEUR, PROBLEME, UTILISATEUR, RESERVOIR, AUTRE;
         
         public String getLabel() {
-            return label;
+            switch (this) {
+                case REGION: return "Region";
+                case PUIT: return "Puit";
+                case FORAGE: return "Forage";
+                case PHASE: return "Phase";
+                case OPERATION: return "Operation";
+                case TYPE_OPERATION: return "Type d'opération";
+                case TYPE_INDICATEUR: return "Type d'indicateur";
+                case INDICATEUR: return "Indicateur";
+                case PROBLEME: return "Problème";
+                case UTILISATEUR: return "Utilisateur";
+                case RESERVOIR: return "Reservoir";
+                case AUTRE: return "Autre";
+                default: return name();
+            }
         }
         
         public static TypeEntite fromLabel(String label) {
@@ -92,9 +86,8 @@ public class Activite {
     @JoinColumn(name = "utilisateur_id")
     private Utilisateur utilisateur;
     
-    @Enumerated(EnumType.STRING)
     @Column(length = 30)
-    private Type type;
+    private String type;
     
     private String description;
     
@@ -103,11 +96,9 @@ public class Activite {
     @Column(name = "entite_concerne")
     private String entiteConcerne;
     
-    @Enumerated(EnumType.STRING)
     @Column(name = "type_entite", length = 30)
-    private TypeEntite typeEntite;
+    private String typeEntite;
     
-    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -124,11 +115,11 @@ public class Activite {
         this.utilisateur = utilisateur;
     }
     
-    public Type getType() {
+    public String getType() {
         return type;
     }
     
-    public void setType(Type type) {
+    public void setType(String type) {
         this.type = type;
     }
     
@@ -156,11 +147,11 @@ public class Activite {
         this.entiteConcerne = entiteConcerne;
     }
     
-    public TypeEntite getTypeEntite() {
+    public String getTypeEntite() {
         return typeEntite;
     }
     
-    public void setTypeEntite(TypeEntite typeEntite) {
+    public void setTypeEntite(String typeEntite) {
         this.typeEntite = typeEntite;
     }
 }

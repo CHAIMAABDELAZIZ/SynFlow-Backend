@@ -51,7 +51,7 @@ public class ActiviteService {
     public List<Activite> findByType(String typeLabel) {
         try {
             Activite.Type type = Activite.Type.fromLabel(typeLabel);
-            return activiteRepository.findByType(type);
+            return activiteRepository.findByType(type.name());
         } catch (IllegalArgumentException e) {
             return List.of();
         }
@@ -64,7 +64,7 @@ public class ActiviteService {
     public List<Activite> findByTypeEntite(String typeEntiteLabel) {
         try {
             Activite.TypeEntite typeEntite = Activite.TypeEntite.fromLabel(typeEntiteLabel);
-            return activiteRepository.findByTypeEntite(typeEntite);
+            return activiteRepository.findByTypeEntite(typeEntite.name());
         } catch (IllegalArgumentException e) {
             return List.of();
         }
@@ -88,20 +88,24 @@ public class ActiviteService {
         
         utilisateurRepository.findById(utilisateurId).ifPresent(activite::setUtilisateur);
         
+        // Set type using the string value directly
         try {
-            activite.setType(Activite.Type.fromLabel(typeLabel));
+            Activite.Type type = Activite.Type.fromLabel(typeLabel);
+            activite.setType(type.name());
         } catch (IllegalArgumentException e) {
-            activite.setType(Activite.Type.AUTRE);
+            activite.setType(Activite.Type.AUTRE.name());
         }
         
         activite.setDescription(description);
         activite.setDate(LocalDateTime.now());
         activite.setEntiteConcerne(entiteConcerne);
         
+        // Set typeEntite using the string value directly
         try {
-            activite.setTypeEntite(Activite.TypeEntite.fromLabel(typeEntiteLabel));
+            Activite.TypeEntite typeEntite = Activite.TypeEntite.fromLabel(typeEntiteLabel);
+            activite.setTypeEntite(typeEntite.name());
         } catch (IllegalArgumentException e) {
-            activite.setTypeEntite(Activite.TypeEntite.AUTRE);
+            activite.setTypeEntite(Activite.TypeEntite.AUTRE.name());
         }
         
         return activiteRepository.save(activite);
@@ -116,18 +120,24 @@ public class ActiviteService {
                         .ifPresent(activite::setUtilisateur);
                 }
                 
+                // Update type as String
                 if (activiteData.getType() != null) {
                     activite.setType(activiteData.getType());
                 }
+                
                 if (activiteData.getDescription() != null) {
                     activite.setDescription(activiteData.getDescription());
                 }
+                
                 if (activiteData.getDate() != null) {
                     activite.setDate(activiteData.getDate());
                 }
+                
                 if (activiteData.getEntiteConcerne() != null) {
                     activite.setEntiteConcerne(activiteData.getEntiteConcerne());
                 }
+                
+                // Update typeEntite as String
                 if (activiteData.getTypeEntite() != null) {
                     activite.setTypeEntite(activiteData.getTypeEntite());
                 }

@@ -14,13 +14,13 @@ import com.example.backend.model.Utilisateur;
 @Repository
 public interface ActiviteRepository extends JpaRepository<Activite, Long> {
     List<Activite> findByUtilisateur(Utilisateur utilisateur);
-    List<Activite> findByType(Activite.Type type);
+    List<Activite> findByType(String type);
     List<Activite> findByDateBetween(LocalDateTime debut, LocalDateTime fin);
-    List<Activite> findByTypeEntite(Activite.TypeEntite typeEntite);
+    List<Activite> findByTypeEntite(String typeEntite);
     List<Activite> findByEntiteConcerne(String entiteConcerne);
     
     // Paginated queries for large result sets
     Page<Activite> findAll(Pageable pageable);
     Page<Activite> findByUtilisateur(Utilisateur utilisateur, Pageable pageable);
-    Page<Activite> findByType(Activite.Type type, Pageable pageable);
+    Page<Activite> findByType(String type, Pageable pageable);
 }
