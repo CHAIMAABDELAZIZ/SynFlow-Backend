@@ -1,0 +1,161 @@
+package com.example.backend.model;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "operations")
+public class Operation {
+    
+    public enum Statut {
+        PLANIFIE("Planifié"),
+        EN_COURS("En cours"),
+        TERMINE("Terminé"),
+        PROBLEME("Problème"),
+        ANNULE("Annulé");
+        
+        private final String label;
+        
+        Statut(String label) {
+            this.label = label;
+        }
+        
+        public String getLabel() {
+            return label;
+        }
+        
+        public static Statut fromLabel(String label) {
+            for (Statut statut : Statut.values()) {
+                if (statut.getLabel().equals(label)) {
+                    return statut;
+                }
+            }
+            throw new IllegalArgumentException("Unknown statut: " + label);
+        }
+    }
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    
+    @ManyToOne
+    @JoinColumn(name = "phase_id")
+    private Phase phase;
+    
+    @ManyToOne
+    @JoinColumn(name = "type_operation_code")
+    private TypeOperation typeOperation;
+    
+    private String description;
+    
+    @Column(name = "date_debut")
+    private LocalDate dateDebut;
+    
+    @Column(name = "date_fin")
+    private LocalDate dateFin;
+    
+    private Double cout;
+    
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    private Statut statut;
+    
+    @ManyToOne
+    @JoinColumn(name = "created_by")
+    private Utilisateur createdBy;
+    
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+    
+    // Getters and Setters
+    public Long getId() {
+        return id;
+    }
+    
+    public void setId(Long id) {
+        this.id = id;
+    }
+    
+    public Phase getPhase() {
+        return phase;
+    }
+    
+    public void setPhase(Phase phase) {
+        this.phase = phase;
+    }
+    
+    public TypeOperation getTypeOperation() {
+        return typeOperation;
+    }
+    
+    public void setTypeOperation(TypeOperation typeOperation) {
+        this.typeOperation = typeOperation;
+    }
+    
+    public String getDescription() {
+        return description;
+    }
+    
+    public void setDescription(String description) {
+        this.description = description;
+    }
+    
+    public LocalDate getDateDebut() {
+        return dateDebut;
+    }
+    
+    public void setDateDebut(LocalDate dateDebut) {
+        this.dateDebut = dateDebut;
+    }
+    
+    public LocalDate getDateFin() {
+        return dateFin;
+    }
+    
+    public void setDateFin(LocalDate dateFin) {
+        this.dateFin = dateFin;
+    }
+    
+    public Double getCout() {
+        return cout;
+    }
+    
+    public void setCout(Double cout) {
+        this.cout = cout;
+    }
+    
+    public Statut getStatut() {
+        return statut;
+    }
+    
+    public void setStatut(Statut statut) {
+        this.statut = statut;
+    }
+    
+    public Utilisateur getCreatedBy() {
+        return createdBy;
+    }
+    
+    public void setCreatedBy(Utilisateur createdBy) {
+        this.createdBy = createdBy;
+    }
+    
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+    
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+}
