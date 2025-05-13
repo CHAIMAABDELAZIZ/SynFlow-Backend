@@ -1,5 +1,7 @@
 package com.example.backend.config;
 
+import java.util.Properties;
+
 import javax.sql.DataSource;
 
 import org.springframework.context.annotation.Bean;
@@ -23,10 +25,15 @@ public class JpaConfig {
         em.setPackagesToScan("com.example.backend.model");
         
         HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
-        vendorAdapter.setGenerateDdl(true);
+        vendorAdapter.setGenerateDdl(false);  // Don't generate DDL
         em.setJpaVendorAdapter(vendorAdapter);
         
-        // Let Spring Boot configuration take over
+        Properties properties = new Properties();
+        properties.setProperty("hibernate.hbm2ddl.auto", "none");
+        properties.setProperty("hibernate.validator.apply_to_ddl", "false");
+        properties.setProperty("jakarta.persistence.schema-generation.database.action", "none");
+        em.setJpaProperties(properties);
+        
         return em;
     }
 
