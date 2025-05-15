@@ -39,7 +39,10 @@ public class JerseyConfig extends ResourceConfig {
         register(ForageResource.class);
         register(PuitResource.class);
         
-        // Enable CORS
+        // Enable CORS filter for Jersey
+        register(CorsFilter.class);
+        
+        // Enable MultiPartFeature
         property("jersey.config.server.provider.classnames", 
                 "org.glassfish.jersey.media.multipart.MultiPartFeature");
         
