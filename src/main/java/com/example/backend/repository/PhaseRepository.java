@@ -12,4 +12,5 @@ import com.example.backend.model.Phase;
 public interface PhaseRepository extends JpaRepository<Phase, Long> {
     List<Phase> findByForage(Forage forage);
     List<Phase> findByForageOrderByNumeroPhase(Forage forage);
+    List<Phase> findByForageAndNumeroPhase(Forage forage, Integer numeroPhase);
 }

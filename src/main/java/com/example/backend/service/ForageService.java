@@ -25,6 +25,10 @@ public class ForageService {
         return forageRepository.findById(id);
     }
 
+    public List<Forage> findByPuitId(Long puitId) {
+        return forageRepository.findByPuitId(puitId);
+    }
+
     public Forage create(Forage forage) {
         return forageRepository.save(forage);
     }

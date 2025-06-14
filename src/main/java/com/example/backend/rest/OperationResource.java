@@ -74,11 +74,23 @@ public class OperationResource {
 
     @POST
     public Response createOperation(Operation operation) {
-        Operation created = operationService.create(operation);
-        return Response.status(Response.Status.CREATED)
-                .entity(new ApiResponse<>(true, created, 
-                    String.format("Operation created successfully with ID %d", created.getId())))
-                .build();
+        try {
+            System.out.println("Creating operation with cost: " + operation.getCoutPrev());
+            Operation created = operationService.create(operation);
+            System.out.println("Created operation with cost: " + created.getCoutPrev());
+            return Response.status(Response.Status.CREATED)
+                    .entity(new ApiResponse<>(true, created, 
+                        String.format("Operation created successfully with ID %d", created.getId())))
+                    .build();
+        } catch (IllegalArgumentException e) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new ApiResponse<>(false, null, e.getMessage()))
+                    .build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(new ApiResponse<>(false, null, "Error creating operation: " + e.getMessage()))
+                    .build();
+        }
     }
 
     @PUT

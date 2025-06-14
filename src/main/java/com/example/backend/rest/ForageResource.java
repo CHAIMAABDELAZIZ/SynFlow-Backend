@@ -16,6 +16,7 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import java.util.List;
 
 @Component
 @Path("/forages")
@@ -52,6 +53,14 @@ public class ForageResource {
                 .entity(new ApiResponse<>(true, created, 
                     String.format("Forage created successfully with ID %d", created.getId())))
                 .build();
+    }
+
+    @GET
+    @Path("/puit/{puitId}")
+    public Response getForagesByPuitId(@PathParam("puitId") Long puitId) {
+        List<Forage> forages = forageService.findByPuitId(puitId);
+        return Response.ok(new ApiResponse<>(true, forages,
+                String.format("Forages for Puit ID %d fetched successfully", puitId))).build();
     }
 
     @PUT

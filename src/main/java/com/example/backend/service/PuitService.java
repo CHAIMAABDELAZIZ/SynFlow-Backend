@@ -36,7 +36,7 @@ public class PuitService {
                 .orElse(List.of());
     }
 
-    public Puit create(Puit puit) {
+    public Puit create(Puit puit) { 
         // Set creation time if not provided
         if (puit.getCreated_at() == null) {
             puit.setCreated_at(LocalDateTime.now());

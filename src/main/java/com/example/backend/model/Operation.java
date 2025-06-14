@@ -1,6 +1,5 @@
 package com.example.backend.model;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
@@ -58,19 +57,18 @@ public class Operation {
     private TypeOperation typeOperation;
     
     private String description;
-    
-    @Column(name = "date_debut")
-    private LocalDate dateDebut;
-    
-    @Column(name = "date_fin")
-    private LocalDate dateFin;
-    
-    private Double cout;
-    
+        
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
     private Statut statut;
     
+    @Column(name = "cout_prevu")
+    private Double coutPrevu;
+
+    @Column(name = "cout_reel")
+    private Double coutReel;
+
+
     @ManyToOne
     @JoinColumn(name = "created_by")
     private Utilisateur createdBy;
@@ -111,29 +109,7 @@ public class Operation {
         this.description = description;
     }
     
-    public LocalDate getDateDebut() {
-        return dateDebut;
-    }
-    
-    public void setDateDebut(LocalDate dateDebut) {
-        this.dateDebut = dateDebut;
-    }
-    
-    public LocalDate getDateFin() {
-        return dateFin;
-    }
-    
-    public void setDateFin(LocalDate dateFin) {
-        this.dateFin = dateFin;
-    }
-    
-    public Double getCout() {
-        return cout;
-    }
-    
-    public void setCout(Double cout) {
-        this.cout = cout;
-    }
+
     
     public Statut getStatut() {
         return statut;
@@ -145,6 +121,22 @@ public class Operation {
     
     public Utilisateur getCreatedBy() {
         return createdBy;
+    }
+
+    public Double getCoutPrev() {
+        return coutPrevu;
+    }
+
+    public void setCoutPrev(Double coutPrev) {
+        this.coutPrevu = coutPrev;
+    }
+
+    public Double getCoutReel() {
+        return coutReel;
+    }
+
+    public void setCoutReel(Double coutReel) {
+        this.coutReel = coutReel;
     }
     
     public void setCreatedBy(Utilisateur createdBy) {

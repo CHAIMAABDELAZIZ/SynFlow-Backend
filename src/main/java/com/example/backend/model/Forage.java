@@ -6,6 +6,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -18,10 +20,22 @@ public class Forage {
     private Double cout;
     private LocalDate date_debut;
     private LocalDate date_fin;
+    @ManyToOne
+    @JoinColumn(name = "puit_id") // colonne dans la table "forages"
+    private Puit puit;
+  
     
     // Getters and Setters
     public Long getId() {
         return id;
+    }
+    
+    public Puit getPuit() {
+        return puit;
+    }
+
+    public void setPuits(Puit puit) { 
+        this.puit = puit;
     }
     
     public void setId(Long id) {

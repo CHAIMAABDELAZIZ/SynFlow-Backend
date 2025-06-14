@@ -10,5 +10,4 @@ import com.example.backend.model.TypeOperation;
 
 @Repository
 public interface TypeOperationRepository extends JpaRepository<TypeOperation, String> {
-    List<TypeOperation> findByPhaseApplicable(Phase phase);
 }

@@ -2,8 +2,6 @@ package com.example.backend.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -16,9 +14,6 @@ public class TypeOperation {
     private String nom;
     private String description;
     
-    @ManyToOne
-    @JoinColumn(name = "phase_applicable_id")
-    private Phase phaseApplicable;
     
     // Getters and Setters
     public String getCode() {
@@ -45,11 +40,5 @@ public class TypeOperation {
         this.description = description;
     }
     
-    public Phase getPhaseApplicable() {
-        return phaseApplicable;
-    }
-    
-    public void setPhaseApplicable(Phase phaseApplicable) {
-        this.phaseApplicable = phaseApplicable;
-    }
+
 }

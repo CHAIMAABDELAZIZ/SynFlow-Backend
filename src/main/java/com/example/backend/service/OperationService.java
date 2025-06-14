@@ -66,47 +66,73 @@ public class OperationService {
     }
 
     public Operation create(Operation operation) {
+        if (operation.getPhase() == null || operation.getPhase().getId() == null)
+            throw new IllegalArgumentException("Phase non spécifiée ou ID manquant");
+
+        if (operation.getTypeOperation() == null || operation.getTypeOperation().getCode() == null)
+            throw new IllegalArgumentException("Type d'opération non spécifié");
+
+
+        operation.setPhase(phaseRepository.findById(operation.getPhase().getId())
+                .orElseThrow(() -> new IllegalArgumentException("Phase introuvable")));
+
+        operation.setTypeOperation(typeOperationRepository.findById(operation.getTypeOperation().getCode())
+                .orElseThrow(() -> new IllegalArgumentException("Type d'opération introuvable")));
+
+        /*operation.setCreatedBy(utilisateurRepository.findById(operation.getCreatedBy().getId())
+                .orElseThrow(() -> new IllegalArgumentException("Utilisateur introuvable")));*/
+
         if (operation.getCreatedAt() == null) {
             operation.setCreatedAt(LocalDateTime.now());
         }
+
+        // Ensure cost fields are properly set
+        if (operation.getCoutPrev() == null) {
+            operation.setCoutPrev(0.0);
+        }
+        
+        if (operation.getCoutReel() == null) {
+            operation.setCoutReel(0.0);
+        }
+
         return operationRepository.save(operation);
     }
 
     public Optional<Operation> update(Long id, Operation operationData) {
         return operationRepository.findById(id)
-            .map(operation -> {
-                // Handle Phase relationship
-                if (operationData.getPhase() != null && operationData.getPhase().getId() != null) {
-                    phaseRepository.findById(operationData.getPhase().getId())
-                        .ifPresent(operation::setPhase);
-                }
-                
-                // Handle TypeOperation relationship
-                if (operationData.getTypeOperation() != null && operationData.getTypeOperation().getCode() != null) {
-                    typeOperationRepository.findById(operationData.getTypeOperation().getCode())
-                        .ifPresent(operation::setTypeOperation);
-                }
-                
-                if (operationData.getDescription() != null) {
-                    operation.setDescription(operationData.getDescription());
-                }
-                if (operationData.getDateDebut() != null) {
-                    operation.setDateDebut(operationData.getDateDebut());
-                }
-                if (operationData.getDateFin() != null) {
-                    operation.setDateFin(operationData.getDateFin());
-                }
-                if (operationData.getCout() != null) {
-                    operation.setCout(operationData.getCout());
-                }
-                if (operationData.getStatut() != null) {
-                    operation.setStatut(operationData.getStatut());
-                }
-                
-                // Don't update createdBy and createdAt
-                
-                return operationRepository.save(operation);
-            });
+                .map(operation -> {
+                    // Handle Phase relationship
+                    if (operationData.getPhase() != null && operationData.getPhase().getId() != null) {
+                        phaseRepository.findById(operationData.getPhase().getId())
+                                .ifPresent(operation::setPhase);
+                    }
+
+                    // Handle TypeOperation relationship
+                    if (operationData.getTypeOperation() != null
+                            && operationData.getTypeOperation().getCode() != null) {
+                        typeOperationRepository.findById(operationData.getTypeOperation().getCode())
+                                .ifPresent(operation::setTypeOperation);
+                    }
+
+                    if (operationData.getDescription() != null) {
+                        operation.setDescription(operationData.getDescription());
+                    }
+
+                    if (operationData.getCoutPrev() != null) {
+                        operation.setCoutPrev(operationData.getCoutPrev());
+                    }
+
+                    if (operationData.getCoutReel() != null) {
+                        operation.setCoutReel(operationData.getCoutReel());
+                    }
+
+                    if (operationData.getStatut() != null) {
+                        operation.setStatut(operationData.getStatut());
+                    }
+
+                    // Ne pas mettre à jour createdBy et createdAt
+                    return operationRepository.save(operation);
+                });
     }
 
     public boolean delete(Long id) {

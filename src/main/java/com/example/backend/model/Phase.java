@@ -46,7 +46,7 @@ public class Phase {
     private Integer numeroPhase;
     
     @Enumerated(EnumType.STRING)
-    @Column(length = 10)
+    @Column(length = 15)  // Increased from 10 to 15 to accommodate POUCES_12_25
     private Diametre diametre;
     
     private String description;

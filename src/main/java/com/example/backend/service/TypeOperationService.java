@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.backend.model.TypeOperation;
-import com.example.backend.repository.PhaseRepository;
 import com.example.backend.repository.TypeOperationRepository;
 
 @Service
@@ -17,47 +16,39 @@ public class TypeOperationService {
 
     @Autowired
     private TypeOperationRepository typeOperationRepository;
-    
-    @Autowired
-    private PhaseRepository phaseRepository;
 
     public List<TypeOperation> findAll() {
         return typeOperationRepository.findAll();
     }
 
-    public Optional<TypeOperation> findByCode(String code) {
+    public Optional<TypeOperation> findById(String code) {
         return typeOperationRepository.findById(code);
-    }
-    
-    public List<TypeOperation> findByPhase(Long phaseId) {
-        return phaseRepository.findById(phaseId)
-                .map(phase -> typeOperationRepository.findByPhaseApplicable(phase))
-                .orElse(List.of());
     }
 
     public TypeOperation create(TypeOperation typeOperation) {
+        if (typeOperation.getCode() == null || typeOperation.getCode().trim().isEmpty())
+            throw new IllegalArgumentException("Code du type d'opération requis");
+
+        if (typeOperation.getNom() == null || typeOperation.getNom().trim().isEmpty())
+            throw new IllegalArgumentException("Nom du type d'opération requis");
+
+        if (typeOperationRepository.existsById(typeOperation.getCode()))
+            throw new IllegalArgumentException("Type d'opération avec ce code existe déjà");
+
         return typeOperationRepository.save(typeOperation);
     }
 
     public Optional<TypeOperation> update(String code, TypeOperation typeOperationData) {
         return typeOperationRepository.findById(code)
-            .map(typeOperation -> {
-                if (typeOperationData.getNom() != null) {
-                    typeOperation.setNom(typeOperationData.getNom());
-                }
-                if (typeOperationData.getDescription() != null) {
-                    typeOperation.setDescription(typeOperationData.getDescription());
-                }
-                
-                // Handle Phase relationship
-                if (typeOperationData.getPhaseApplicable() != null && 
-                    typeOperationData.getPhaseApplicable().getId() != null) {
-                    phaseRepository.findById(typeOperationData.getPhaseApplicable().getId())
-                        .ifPresent(typeOperation::setPhaseApplicable);
-                }
-                
-                return typeOperationRepository.save(typeOperation);
-            });
+                .map(typeOperation -> {
+                    if (typeOperationData.getNom() != null) {
+                        typeOperation.setNom(typeOperationData.getNom());
+                    }
+                    if (typeOperationData.getDescription() != null) {
+                        typeOperation.setDescription(typeOperationData.getDescription());
+                    }
+                    return typeOperationRepository.save(typeOperation);
+                });
     }
 
     public boolean delete(String code) {
