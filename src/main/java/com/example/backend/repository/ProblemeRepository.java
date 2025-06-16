@@ -13,8 +13,12 @@ import com.example.backend.model.Utilisateur;
 public interface ProblemeRepository extends JpaRepository<Probleme, Long> {
     List<Probleme> findByOperation(Operation operation);
     List<Probleme> findByType(Probleme.Type type);
-    List<Probleme> findBySignalePar(Utilisateur utilisateur);
-    List<Probleme> findByResoluPar(Utilisateur utilisateur);
+    List<Probleme> findBySignalePar(Utilisateur signalePar);
+    List<Probleme> findByResoluPar(Utilisateur resoluPar);
     List<Probleme> findByGravite(Probleme.Gravite gravite);
     List<Probleme> findByStatut(Probleme.Statut statut);
+    
+    // Find existing problems to avoid duplicates
+    List<Probleme> findByOperationAndTypeAndStatutNot(Operation operation, Probleme.Type type, Probleme.Statut statut);
+    List<Probleme> findByDescriptionContainingAndStatutNot(String description, Probleme.Statut statut);
 }

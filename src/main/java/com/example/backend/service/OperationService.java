@@ -54,9 +54,9 @@ public class OperationService {
                 .orElse(List.of());
     }
     
-    public List<Operation> findByCreatedBy(Long userId) {
-        return utilisateurRepository.findById(userId)
-                .map(user -> operationRepository.findByCreatedBy(user))
+    public List<Operation> findByCreatedBy(Long utilisateurId) {
+        return utilisateurRepository.findById(utilisateurId)
+                .map(utilisateur -> operationRepository.findByCreatedBy(utilisateur))
                 .orElse(List.of());
     }
     
@@ -68,87 +68,108 @@ public class OperationService {
             return List.of();
         }
     }
-
-    public Operation create(Operation operation) {
-        if (operation.getPhase() == null || operation.getPhase().getId() == null)
-            throw new IllegalArgumentException("Phase non spécifiée ou ID manquant");
-
-        if (operation.getTypeOperation() == null || operation.getTypeOperation().getCode() == null)
-            throw new IllegalArgumentException("Type d'opération non spécifié");
-
-
-        operation.setPhase(phaseRepository.findById(operation.getPhase().getId())
-                .orElseThrow(() -> new IllegalArgumentException("Phase introuvable")));
-
-        operation.setTypeOperation(typeOperationRepository.findById(operation.getTypeOperation().getCode())
-                .orElseThrow(() -> new IllegalArgumentException("Type d'opération introuvable")));
-
-        /*operation.setCreatedBy(utilisateurRepository.findById(operation.getCreatedBy().getId())
-                .orElseThrow(() -> new IllegalArgumentException("Utilisateur introuvable")));*/
-
-        if (operation.getCreatedAt() == null) {
-            operation.setCreatedAt(LocalDateTime.now());
-        }
-
-        // Ensure cost fields are properly set
-        if (operation.getCoutPrev() == null) {
-            operation.setCoutPrev(0.0);
-        }
-        
-        if (operation.getCoutReel() == null) {
-            operation.setCoutReel(0.0);
-        }
-
-        return operationRepository.save(operation);
-    }
-
+    
     public List<Operation> findByDailyReport(Long dailyReportId) {
         return dailyReportRepository.findById(dailyReportId)
                 .map(dailyReport -> operationRepository.findByDailyReport(dailyReport))
                 .orElse(List.of());
     }
 
+    public Operation create(Operation operation) {
+        // Validate and set phase
+        if (operation.getPhase() != null && operation.getPhase().getId() != null) {
+            phaseRepository.findById(operation.getPhase().getId())
+                    .ifPresent(operation::setPhase);
+        }
+        
+        // Validate and set type operation
+        if (operation.getTypeOperation() != null && operation.getTypeOperation().getCode() != null) {
+            typeOperationRepository.findById(operation.getTypeOperation().getCode())
+                    .ifPresent(operation::setTypeOperation);
+        }
+        
+        // Validate and set created by
+        if (operation.getCreatedBy() != null && operation.getCreatedBy().getId() != null) {
+            utilisateurRepository.findById(operation.getCreatedBy().getId())
+                    .ifPresent(operation::setCreatedBy);
+        }
+        
+        // Validate and set daily report
+        if (operation.getDailyReport() != null && operation.getDailyReport().getId() != null) {
+            dailyReportRepository.findById(operation.getDailyReport().getId())
+                    .ifPresent(operation::setDailyReport);
+        }
+        
+        // Set default values
+        if (operation.getCreatedAt() == null) {
+            operation.setCreatedAt(LocalDateTime.now());
+        }
+        
+        if (operation.getStatut() == null) {
+            operation.setStatut(Operation.Statut.PLANIFIE);
+        }
+        
+        if (operation.getCoutReel() == null) {
+            operation.setCoutReel(0.0);
+        }
+
+        System.out.println("Creating operation with coutPrev: " + operation.getCoutPrev() + ", coutReel: " + operation.getCoutReel());
+        Operation saved = operationRepository.save(operation);
+        System.out.println("Saved operation with ID: " + saved.getId() + ", coutPrev: " + saved.getCoutPrev() + ", coutReel: " + saved.getCoutReel());
+        
+        return saved;
+    }
+
     public Optional<Operation> update(Long id, Operation operationData) {
         return operationRepository.findById(id)
-                .map(operation -> {
-                    // Handle Phase relationship
-                    if (operationData.getPhase() != null && operationData.getPhase().getId() != null) {
-                        phaseRepository.findById(operationData.getPhase().getId())
-                                .ifPresent(operation::setPhase);
-                    }
-
-                    // Handle TypeOperation relationship
-                    if (operationData.getTypeOperation() != null
-                            && operationData.getTypeOperation().getCode() != null) {
-                        typeOperationRepository.findById(operationData.getTypeOperation().getCode())
-                                .ifPresent(operation::setTypeOperation);
-                    }
-
-                    if (operationData.getDescription() != null) {
-                        operation.setDescription(operationData.getDescription());
-                    }
-
-                    if (operationData.getCoutPrev() != null) {
-                        operation.setCoutPrev(operationData.getCoutPrev());
-                    }
-
-                    if (operationData.getCoutReel() != null) {
-                        operation.setCoutReel(operationData.getCoutReel());
-                    }
-
-                    if (operationData.getStatut() != null) {
-                        operation.setStatut(operationData.getStatut());
-                    }
-                    
-                    // Handle DailyReport relationship
-                    if (operationData.getDailyReport() != null && operationData.getDailyReport().getId() != null) {
-                        dailyReportRepository.findById(operationData.getDailyReport().getId())
-                                .ifPresent(operation::setDailyReport);
-                    }
-
-                    // Ne pas mettre à jour createdBy et createdAt
-                    return operationRepository.save(operation);
-                });
+            .map(operation -> {
+                System.out.println("=== UPDATING OPERATION " + id + " ===");
+                System.out.println("Before update - coutPrev: " + operation.getCoutPrev() + ", coutReel: " + operation.getCoutReel());
+                
+                // Handle Phase relationship
+                if (operationData.getPhase() != null && operationData.getPhase().getId() != null) {
+                    phaseRepository.findById(operationData.getPhase().getId())
+                            .ifPresent(operation::setPhase);
+                }
+                
+                // Handle TypeOperation relationship
+                if (operationData.getTypeOperation() != null && operationData.getTypeOperation().getCode() != null) {
+                    typeOperationRepository.findById(operationData.getTypeOperation().getCode())
+                            .ifPresent(operation::setTypeOperation);
+                }
+                
+                // Handle CreatedBy relationship
+                if (operationData.getCreatedBy() != null && operationData.getCreatedBy().getId() != null) {
+                    utilisateurRepository.findById(operationData.getCreatedBy().getId())
+                            .ifPresent(operation::setCreatedBy);
+                }
+                
+                // Handle DailyReport relationship
+                if (operationData.getDailyReport() != null && operationData.getDailyReport().getId() != null) {
+                    dailyReportRepository.findById(operationData.getDailyReport().getId())
+                            .ifPresent(operation::setDailyReport);
+                }
+                
+                if (operationData.getDescription() != null) {
+                    operation.setDescription(operationData.getDescription());
+                }
+                if (operationData.getStatut() != null) {
+                    operation.setStatut(operationData.getStatut());
+                }
+                if (operationData.getCoutPrev() != null) {
+                    operation.setCoutPrev(operationData.getCoutPrev());
+                }
+                if (operationData.getCoutReel() != null) {
+                    operation.setCoutReel(operationData.getCoutReel());
+                    System.out.println("Updated coutReel to: " + operationData.getCoutReel());
+                }
+                
+                Operation saved = operationRepository.save(operation);
+                System.out.println("After update - coutPrev: " + saved.getCoutPrev() + ", coutReel: " + saved.getCoutReel());
+                System.out.println("=== OPERATION UPDATE COMPLETE ===");
+                
+                return saved;
+            });
     }
 
     public boolean delete(Long id) {

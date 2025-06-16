@@ -1,54 +1,55 @@
 package com.example.backend.config;
 
 import org.glassfish.jersey.server.ResourceConfig;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
-import com.example.backend.rest.BookResource;
 import com.example.backend.rest.DailyReportResource;
-import com.example.backend.rest.DocumentResource;
 import com.example.backend.rest.ForageResource;
-import com.example.backend.rest.IndicateurResource;
 import com.example.backend.rest.OperationResource;
 import com.example.backend.rest.PhaseResource;
 import com.example.backend.rest.ProblemeResource;
 import com.example.backend.rest.PuitResource;
 import com.example.backend.rest.RegionResource;
-import com.example.backend.rest.ReservoirResource;
 import com.example.backend.rest.TypeIndicateurResource;
 import com.example.backend.rest.TypeOperationResource;
 import com.example.backend.rest.UtilisateurResource;
 
-import jakarta.ws.rs.ApplicationPath;
-
-@Configuration
-@ApplicationPath("/api")
+@Component
 public class JerseyConfig extends ResourceConfig {
-    
+
     public JerseyConfig() {
-        // Register all resource classes
-        register(BookResource.class);
+        // Register all REST resources
+        register(PuitResource.class);
         register(RegionResource.class);
         register(UtilisateurResource.class);
-        register(OperationResource.class);
-        register(PhaseResource.class);
         register(TypeOperationResource.class);
         register(TypeIndicateurResource.class);
-        register(IndicateurResource.class);
-        register(ProblemeResource.class);
-        register(DocumentResource.class);
-        register(ReservoirResource.class);
         register(ForageResource.class);
-        register(PuitResource.class);
+        register(PhaseResource.class);
+        register(OperationResource.class);
         register(DailyReportResource.class);
+        register(ProblemeResource.class); // Make sure this is registered
         
-        // Enable CORS filter for Jersey
+        // Enable CORS
         register(CorsFilter.class);
         
-        // Enable MultiPartFeature
-        property("jersey.config.server.provider.classnames", 
-                "org.glassfish.jersey.media.multipart.MultiPartFeature");
-        
-        // For proper handling of Jackson serialization
-        register(org.glassfish.jersey.jackson.JacksonFeature.class);
+        // Enable logging
+        property("jersey.config.server.tracing.type", "ALL");
+        property("jersey.config.server.tracing.threshold", "VERBOSE");
+    }
+    
+    // CORS Filter
+    @Component
+    public static class CorsFilter implements jakarta.ws.rs.container.ContainerResponseFilter {
+        @Override
+        public void filter(jakarta.ws.rs.container.ContainerRequestContext requestContext,
+                          jakarta.ws.rs.container.ContainerResponseContext responseContext) {
+            responseContext.getHeaders().add("Access-Control-Allow-Origin", "*");
+            responseContext.getHeaders().add("Access-Control-Allow-Headers", 
+                "origin, content-type, accept, authorization");
+            responseContext.getHeaders().add("Access-Control-Allow-Credentials", "true");
+            responseContext.getHeaders().add("Access-Control-Allow-Methods", 
+                "GET, POST, PUT, DELETE, OPTIONS, HEAD");
+        }
     }
 }

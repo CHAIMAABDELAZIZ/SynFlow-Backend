@@ -1,6 +1,7 @@
 package com.example.backend.service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -8,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.backend.model.DailyReport;
+import com.example.backend.model.Operation;
 import com.example.backend.model.Probleme;
 import com.example.backend.repository.OperationRepository;
 import com.example.backend.repository.ProblemeRepository;
@@ -25,6 +28,12 @@ public class ProblemeService {
     
     @Autowired
     private UtilisateurRepository utilisateurRepository;
+    
+    @Autowired
+    private ProblemeDetectionService problemeDetectionService;
+    
+    @Autowired
+    private DailyReportService dailyReportService;
 
     public List<Probleme> findAll() {
         return problemeRepository.findAll();
@@ -80,16 +89,29 @@ public class ProblemeService {
     }
 
     public Probleme create(Probleme probleme) {
-        if (probleme.getDateDetection() == null) {
-            probleme.setDateDetection(LocalDate.now());
+        try {
+            if (probleme.getDateDetection() == null) {
+                probleme.setDateDetection(LocalDate.now());
+            }
+            
+            // Default to OUVERT status if not specified
+            if (probleme.getStatut() == null) {
+                probleme.setStatut(Probleme.Statut.OUVERT);
+            }
+            
+            System.out.println("Creating problem: " + probleme.getDescription());
+            System.out.println("Problem type: " + probleme.getType());
+            System.out.println("Problem gravity: " + probleme.getGravite());
+            System.out.println("Problem status: " + probleme.getStatut());
+            
+            Probleme saved = problemeRepository.save(probleme);
+            System.out.println("Successfully created problem with ID: " + saved.getId());
+            return saved;
+        } catch (Exception e) {
+            System.err.println("Error creating problem: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
         }
-        
-        // Default to OUVERT status if not specified
-        if (probleme.getStatut() == null) {
-            probleme.setStatut(Probleme.Statut.OUVERT);
-        }
-        
-        return problemeRepository.save(probleme);
     }
 
     public Optional<Probleme> update(Long id, Probleme problemeData) {
@@ -161,5 +183,61 @@ public class ProblemeService {
                 return true;
             })
             .orElse(false);
+    }
+
+    /**
+     * Detect problems from a daily report and updated operations
+     */
+    public List<Probleme> detectProblemsFromDailyReport(Long dailyReportId, List<Long> updatedOperationIds) {
+        try {
+            System.out.println("=== PROBLEM DETECTION SERVICE ===");
+            System.out.println("Daily Report ID: " + dailyReportId);
+            System.out.println("Updated Operation IDs: " + updatedOperationIds);
+            
+            // Get the daily report
+            Optional<DailyReport> dailyReportOpt = dailyReportService.findById(dailyReportId);
+            if (!dailyReportOpt.isPresent()) {
+                System.err.println("Daily report not found: " + dailyReportId);
+                return List.of();
+            }
+            
+            DailyReport dailyReport = dailyReportOpt.get();
+            System.out.println("Found daily report: " + dailyReport.getReportName());
+            System.out.println("Daily report current phase: " + (dailyReport.getCurrentPhase() != null ? dailyReport.getCurrentPhase().getId() : "null"));
+            
+            // Get the updated operations
+            List<Operation> updatedOperations = new ArrayList<>();
+            if (updatedOperationIds != null && !updatedOperationIds.isEmpty()) {
+                System.out.println("Fetching updated operations...");
+                for (Long operationId : updatedOperationIds) {
+                    Optional<Operation> operationOpt = operationRepository.findById(operationId);
+                    if (operationOpt.isPresent()) {
+                        Operation operation = operationOpt.get();
+                        System.out.println("Operation " + operationId + " - coutPrev: " + operation.getCoutPrev() + ", coutReel: " + operation.getCoutReel());
+                        updatedOperations.add(operation);
+                    } else {
+                        System.err.println("Operation not found: " + operationId);
+                    }
+                }
+            }
+            System.out.println("Found " + updatedOperations.size() + " updated operations");
+            
+            // Use the detection service to find problems
+            List<Probleme> detectedProblems = problemeDetectionService.detectAndCreateProblems(dailyReport, updatedOperations);
+            
+            System.out.println("Detection completed. Found " + detectedProblems.size() + " problems");
+            for (Probleme problem : detectedProblems) {
+                System.out.println("Problem: " + problem.getType() + " - " + problem.getDescription());
+                System.out.println("Impact Cost: " + problem.getImpactCout());
+                System.out.println("Severity: " + problem.getGravite());
+                System.out.println("Status: " + problem.getStatut());
+            }
+            
+            return detectedProblems;
+        } catch (Exception e) {
+            System.err.println("Error in detectProblemsFromDailyReport: " + e.getMessage());
+            e.printStackTrace();
+            return List.of();
+        }
     }
 }

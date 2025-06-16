@@ -18,10 +18,10 @@ import jakarta.persistence.Table;
 public class Probleme {
     
     public enum Type {
-        DELAI("Délai"),
-        COUT("Coût"),
-        SECURITE("Sécurité"),
-        TECHNIQUE("Technique");
+        COUT("Dépassement des coûts"),
+        DELAI("Dépassement des délais"),
+        TECHNIQUE("Problème technique"),
+        SECURITE("Problème sécurité");
         
         private final String label;
         
@@ -107,13 +107,14 @@ public class Probleme {
     private Type type;
     
     @ManyToOne
-    @JoinColumn(name = "signale_par")
+    @JoinColumn(name = "signale_par_id")
     private Utilisateur signalePar;
     
     @ManyToOne
-    @JoinColumn(name = "resolu_par")
+    @JoinColumn(name = "resolu_par_id")
     private Utilisateur resoluPar;
     
+    @Column(length = 1000)
     private String description;
     
     @Column(name = "date_detection")
@@ -123,24 +124,27 @@ public class Probleme {
     private LocalDate dateResolution;
     
     @Enumerated(EnumType.STRING)
-    @Column(length = 20)
+    @Column(length = 15)
     private Gravite gravite;
     
-    @Column(name = "solution_propose")
+    @Column(name = "solution_propose", length = 1000)
     private String solutionPropose;
     
-    @Column(name = "solution_implemente")
+    @Column(name = "solution_implemente", length = 1000)
     private String solutionImplemente;
     
     @Enumerated(EnumType.STRING)
-    @Column(length = 20)
+    @Column(length = 15)
     private Statut statut;
     
     @Column(name = "impact_delai")
-    private Integer impactDelai;
+    private Integer impactDelai; // in days
     
     @Column(name = "impact_cout")
-    private Double impactCout;
+    private Double impactCout; // in currency
+    
+    // Constructors
+    public Probleme() {}
     
     // Getters and Setters
     public Long getId() {
@@ -253,5 +257,18 @@ public class Probleme {
     
     public void setImpactCout(Double impactCout) {
         this.impactCout = impactCout;
+    }
+    
+    @Override
+    public String toString() {
+        return "Probleme{" +
+                "id=" + id +
+                ", type=" + type +
+                ", description='" + description + '\'' +
+                ", gravite=" + gravite +
+                ", statut=" + statut +
+                ", impactCout=" + impactCout +
+                ", impactDelai=" + impactDelai +
+                '}';
     }
 }
