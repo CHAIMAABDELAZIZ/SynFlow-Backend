@@ -12,6 +12,7 @@ import com.example.backend.model.DailyReport;
 import com.example.backend.model.Operation;
 import com.example.backend.model.Phase;
 import com.example.backend.model.Probleme;
+import com.example.backend.repository.OperationRepository;
 import com.example.backend.repository.ProblemeRepository;
 import com.example.backend.repository.UtilisateurRepository;
 
@@ -24,6 +25,9 @@ public class ProblemeDetectionService {
     
     @Autowired
     private UtilisateurRepository utilisateurRepository;
+    
+    @Autowired
+    private OperationRepository operationRepository;
 
     /**
      * Detect and create problems after a daily report is saved
@@ -116,66 +120,66 @@ public class ProblemeDetectionService {
     private Probleme createCostOverrunProblem(Operation operation, DailyReport dailyReport, com.example.backend.model.Utilisateur systemUser) {
         System.out.println("=== CREATING COST OVERRUN PROBLEM ===");
         
-        try {
-            // Check if a similar problem already exists for this operation
-            List<Probleme> existingProblems = problemeRepository.findByOperationAndTypeAndStatutNot(
-                operation, Probleme.Type.COUT, Probleme.Statut.FERME);
-            
-            System.out.println("Found " + existingProblems.size() + " existing cost problems for this operation");
-            
-            if (!existingProblems.isEmpty()) {
-                // Update existing problem with new cost information
-                Probleme existingProblem = existingProblems.get(0);
-                double overrun = operation.getCoutReel() - operation.getCoutPrev();
-                existingProblem.setImpactCout(overrun);
-                existingProblem.setDescription(String.format(
-                    "Dépassement de coût détecté pour l'opération '%s'. Coût prévu: %.2f DZD, Coût réel: %.2f DZD, Dépassement: %.2f DZD",
-                    operation.getDescription(),
-                    operation.getCoutPrev(),
-                    operation.getCoutReel(),
-                    overrun
-                ));
-                System.out.println("Updated existing problem: " + existingProblem.getId());
-                return problemeRepository.save(existingProblem);
-            }
-            
-            // Create new cost overrun problem
+        // Check if a similar problem already exists for this operation
+        List<Probleme> existingProblems = problemeRepository.findByOperationAndTypeAndStatutNot(
+            operation, Probleme.Type.COUT, Probleme.Statut.FERME);
+        
+        System.out.println("Found " + existingProblems.size() + " existing cost problems for this operation");
+        
+        if (!existingProblems.isEmpty()) {
+            // Update existing problem with new cost information
+            Probleme existingProblem = existingProblems.get(0);
             double overrun = operation.getCoutReel() - operation.getCoutPrev();
-            System.out.println("Creating new cost overrun problem:");
-            System.out.println("  - Overrun amount: " + overrun);
-            
-            Probleme probleme = new Probleme();
-            probleme.setOperation(operation);
-            probleme.setType(Probleme.Type.COUT);
-            probleme.setDescription(String.format(
+            existingProblem.setImpactCout(overrun);
+            existingProblem.setDescription(String.format(
                 "Dépassement de coût détecté pour l'opération '%s'. Coût prévu: %.2f DZD, Coût réel: %.2f DZD, Dépassement: %.2f DZD",
                 operation.getDescription(),
                 operation.getCoutPrev(),
                 operation.getCoutReel(),
                 overrun
             ));
-            probleme.setDateDetection(LocalDate.now());
-            probleme.setSignalePar(systemUser);
-            probleme.setImpactCout(overrun);
-            
-            // Determine severity based on overrun percentage
-            double overrunPercentage = (overrun / operation.getCoutPrev()) * 100;
-            System.out.println("  - Overrun percentage: " + overrunPercentage + "%");
-            
-            if (overrunPercentage > 50) {
-                probleme.setGravite(Probleme.Gravite.CRITIQUE);
-            } else if (overrunPercentage > 20) {
-                probleme.setGravite(Probleme.Gravite.MODEREE);
-            } else {
-                probleme.setGravite(Probleme.Gravite.FAIBLE);
-            }
-            
-            probleme.setStatut(Probleme.Statut.OUVERT);
-            probleme.setSolutionPropose("Analyser les causes du dépassement et ajuster les estimations futures.");
-            
-            System.out.println("  - Severity: " + probleme.getGravite());
-            System.out.println("  - Status: " + probleme.getStatut());
-            
+            System.out.println("Updated existing problem: " + existingProblem.getId());
+            return problemeRepository.save(existingProblem);
+        }
+        
+        // Create new cost overrun problem
+        double overrun = operation.getCoutReel() - operation.getCoutPrev();
+        System.out.println("Creating new cost overrun problem:");
+        System.out.println("  - Overrun amount: " + overrun);
+        
+        Probleme probleme = new Probleme();
+        probleme.setOperation(operation);
+        probleme.setType(Probleme.Type.COUT);
+        probleme.setDescription(String.format(
+            "Dépassement de coût détecté pour l'opération '%s'. Coût prévu: %.2f DZD, Coût réel: %.2f DZD, Dépassement: %.2f DZD",
+            operation.getDescription(),
+            operation.getCoutPrev(),
+            operation.getCoutReel(),
+            overrun
+        ));
+        probleme.setDateDetection(LocalDate.now());
+        probleme.setSignalePar(systemUser);
+        probleme.setImpactCout(overrun);
+        
+        // Determine severity based on overrun percentage
+        double overrunPercentage = (overrun / operation.getCoutPrev()) * 100;
+        System.out.println("  - Overrun percentage: " + overrunPercentage + "%");
+        
+        if (overrunPercentage > 50) {
+            probleme.setGravite(Probleme.Gravite.CRITIQUE);
+        } else if (overrunPercentage > 20) {
+            probleme.setGravite(Probleme.Gravite.MODEREE);
+        } else {
+            probleme.setGravite(Probleme.Gravite.FAIBLE);
+        }
+        
+        probleme.setStatut(Probleme.Statut.OUVERT);
+        probleme.setSolutionPropose("Analyser les causes du dépassement et ajuster les estimations futures.");
+        
+        System.out.println("  - Severity: " + probleme.getGravite());
+        System.out.println("  - Status: " + probleme.getStatut());
+        
+        try {
             Probleme saved = problemeRepository.save(probleme);
             System.out.println("Successfully saved cost overrun problem with ID: " + saved.getId());
             return saved;
@@ -211,6 +215,16 @@ public class ProblemeDetectionService {
             double depthOverrun = phase.getProfondeurReelle() - phase.getProfondeurPrevue();
             
             Probleme probleme = new Probleme();
+            
+            // Find an operation from the current phase to attach to the problem
+            Operation attachedOperation = findOperationForPhase(phase);
+            if (attachedOperation != null) {
+                probleme.setOperation(attachedOperation);
+                System.out.println("Attached operation " + attachedOperation.getId() + " to depth overrun problem for phase " + phase.getNumeroPhase());
+            } else {
+                System.out.println("No operation found to attach to depth overrun problem for phase " + phase.getNumeroPhase());
+            }
+            
             probleme.setType(Probleme.Type.TECHNIQUE);
             probleme.setDescription(String.format(
                 "Phase %d - Dépassement de profondeur détecté. Profondeur prévue: %.2f m, Profondeur réelle: %.2f m, Dépassement: %.2f m",
@@ -314,6 +328,16 @@ public class ProblemeDetectionService {
             long delayDays = java.time.temporal.ChronoUnit.DAYS.between(plannedDate, actualDate);
             
             Probleme probleme = new Probleme();
+            
+            // Find an operation from the current phase to attach to the problem
+            Operation attachedOperation = findOperationForPhase(phase);
+            if (attachedOperation != null) {
+                probleme.setOperation(attachedOperation);
+                System.out.println("Attached operation " + attachedOperation.getId() + " to schedule delay problem for phase " + phase.getNumeroPhase());
+            } else {
+                System.out.println("No operation found to attach to schedule delay problem for phase " + phase.getNumeroPhase());
+            }
+            
             probleme.setType(Probleme.Type.DELAI);
             probleme.setDescription(String.format(
                 "Phase %d - Retard de %s détecté. Date prévue: %s, Date réelle: %s, Retard: %d jours",
@@ -343,6 +367,34 @@ public class ProblemeDetectionService {
         } catch (Exception e) {
             System.err.println("Error creating schedule delay problem: " + e.getMessage());
             e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * Find an operation from the given phase to attach to a problem
+     * This provides access to forage and puit data through the operation's phase relationship
+     */
+    private Operation findOperationForPhase(Phase phase) {
+        try {
+            // First, try to find operations from updated operations list for this phase
+            List<Operation> phaseOperations = operationRepository.findByPhase(phase);
+            
+            if (!phaseOperations.isEmpty()) {
+                // Prefer operations that have cost data (more likely to be relevant)
+                for (Operation operation : phaseOperations) {
+                    if (operation.getCoutReel() != null && operation.getCoutReel() > 0) {
+                        return operation;
+                    }
+                }
+                // If no operations with real cost, return the first available operation
+                return phaseOperations.get(0);
+            }
+            
+            System.out.println("No operations found for phase " + phase.getNumeroPhase());
+            return null;
+        } catch (Exception e) {
+            System.err.println("Error finding operation for phase " + phase.getNumeroPhase() + ": " + e.getMessage());
             return null;
         }
     }
