@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import com.example.backend.model.DailyReport;
 import com.example.backend.model.Operation;
 import com.example.backend.model.Phase;
 import com.example.backend.model.TypeOperation;
@@ -16,4 +17,5 @@ public interface OperationRepository extends JpaRepository<Operation, Long> {
     List<Operation> findByTypeOperation(TypeOperation typeOperation);
     List<Operation> findByCreatedBy(Utilisateur createdBy);
     List<Operation> findByStatut(Operation.Statut statut);
+    List<Operation> findByDailyReport(DailyReport dailyReport);
 }

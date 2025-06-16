@@ -2,6 +2,8 @@ package com.example.backend.model;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -76,6 +78,11 @@ public class Operation {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
     
+    @ManyToOne
+    @JoinColumn(name = "daily_report_id")
+    @JsonBackReference("dailyReport-operations")
+    private DailyReport dailyReport;
+    
     // Getters and Setters
     public Long getId() {
         return id;
@@ -149,5 +156,13 @@ public class Operation {
     
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+    
+    public DailyReport getDailyReport() {
+        return dailyReport;
+    }
+    
+    public void setDailyReport(DailyReport dailyReport) {
+        this.dailyReport = dailyReport;
     }
 }

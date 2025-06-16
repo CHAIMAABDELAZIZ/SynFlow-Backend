@@ -7,7 +7,6 @@ import org.springframework.stereotype.Repository;
 
 import com.example.backend.model.Puit;
 import com.example.backend.model.Region;
-
 @Repository
 public interface PuitRepository extends JpaRepository<Puit, Long> {
     List<Puit> findByRegion(Region region);

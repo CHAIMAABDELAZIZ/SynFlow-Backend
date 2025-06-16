@@ -4,6 +4,7 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.springframework.context.annotation.Configuration;
 
 import com.example.backend.rest.BookResource;
+import com.example.backend.rest.DailyReportResource;
 import com.example.backend.rest.DocumentResource;
 import com.example.backend.rest.ForageResource;
 import com.example.backend.rest.IndicateurResource;
@@ -38,6 +39,7 @@ public class JerseyConfig extends ResourceConfig {
         register(ReservoirResource.class);
         register(ForageResource.class);
         register(PuitResource.class);
+        register(DailyReportResource.class);
         
         // Enable CORS filter for Jersey
         register(CorsFilter.class);

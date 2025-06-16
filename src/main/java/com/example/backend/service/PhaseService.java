@@ -32,7 +32,7 @@ public class PhaseService {
     
     public List<Phase> findByForage(Long forageId) {
         return forageRepository.findById(forageId)
-                .map(forage -> phaseRepository.findByForage(forage))
+                .map(forage -> phaseRepository.findByForageOrderByNumeroPhase(forage))
                 .orElse(List.of());
     }
 
@@ -95,10 +95,15 @@ public class PhaseService {
         try {
             System.out.println("=== PHASE SERVICE UPDATE ===");
             System.out.println("Updating phase ID: " + id);
+            System.out.println("Input phase data: " + phaseData);
             
             return phaseRepository.findById(id)
                     .map(phase -> {
                         System.out.println("Found existing phase: " + phase.getId());
+                        System.out.println("Before update:");
+                        System.out.println("  - profondeurReelle: " + phase.getProfondeurReelle());
+                        System.out.println("  - dateDebutReelle: " + phase.getDateDebutReelle());
+                        System.out.println("  - dateFinReelle: " + phase.getDateFinReelle());
                         
                         // Handle Forage relationship
                         if (phaseData.getForage() != null && phaseData.getForage().getId() != null) {
@@ -109,6 +114,7 @@ public class PhaseService {
                                     });
                         }
 
+                        // Update basic fields
                         if (phaseData.getNumeroPhase() != null) {
                             System.out.println("Setting phase number: " + phaseData.getNumeroPhase());
                             phase.setNumeroPhase(phaseData.getNumeroPhase());
@@ -124,24 +130,52 @@ public class PhaseService {
                             phase.setDescription(phaseData.getDescription());
                         }
 
+                        // Update planned fields
                         if (phaseData.getProfondeurPrevue() != null) {
+                            System.out.println("Setting profondeurPrevue: " + phaseData.getProfondeurPrevue());
                             phase.setProfondeurPrevue(phaseData.getProfondeurPrevue());
                         }
 
                         if (phaseData.getDateDebutPrevue() != null) {
-                            System.out.println("Setting start date: " + phaseData.getDateDebutPrevue());
+                            System.out.println("Setting dateDebutPrevue: " + phaseData.getDateDebutPrevue());
                             phase.setDateDebutPrevue(phaseData.getDateDebutPrevue());
                         }
 
                         if (phaseData.getDateFinPrevue() != null) {
-                            System.out.println("Setting end date: " + phaseData.getDateFinPrevue());
+                            System.out.println("Setting dateFinPrevue: " + phaseData.getDateFinPrevue());
                             phase.setDateFinPrevue(phaseData.getDateFinPrevue());
                         }
+                        
+                        // Update real fields - these are the critical ones for daily reports
+                        if (phaseData.getProfondeurReelle() != null) {
+                            System.out.println("Setting profondeurReelle: " + phaseData.getProfondeurReelle() + " (was: " + phase.getProfondeurReelle() + ")");
+                            phase.setProfondeurReelle(phaseData.getProfondeurReelle());
+                        }
+                        
+                        if (phaseData.getDateDebutReelle() != null) {
+                            System.out.println("Setting dateDebutReelle: " + phaseData.getDateDebutReelle() + " (was: " + phase.getDateDebutReelle() + ")");
+                            phase.setDateDebutReelle(phaseData.getDateDebutReelle());
+                        }
+                        
+                        if (phaseData.getDateFinReelle() != null) {
+                            System.out.println("Setting dateFinReelle: " + phaseData.getDateFinReelle() + " (was: " + phase.getDateFinReelle() + ")");
+                            phase.setDateFinReelle(phaseData.getDateFinReelle());
+                        }
 
-                        System.out.println("Saving updated phase...");
-                        Phase saved = phaseRepository.save(phase);
-                        System.out.println("Phase updated successfully");
-                        return saved;
+                        System.out.println("About to save phase with:");
+                        System.out.println("  - profondeurReelle: " + phase.getProfondeurReelle());
+                        System.out.println("  - dateDebutReelle: " + phase.getDateDebutReelle());
+                        System.out.println("  - dateFinReelle: " + phase.getDateFinReelle());
+                        
+                        Phase savedPhase = phaseRepository.save(phase);
+                        
+                        System.out.println("Phase saved successfully with:");
+                        System.out.println("  - profondeurReelle: " + savedPhase.getProfondeurReelle());
+                        System.out.println("  - dateDebutReelle: " + savedPhase.getDateDebutReelle());
+                        System.out.println("  - dateFinReelle: " + savedPhase.getDateFinReelle());
+                        System.out.println("=== PHASE UPDATE SUCCESS ===");
+                        
+                        return savedPhase;
                     });
         } catch (Exception e) {
             System.err.println("=== PHASE SERVICE UPDATE ERROR ===");

@@ -2,6 +2,8 @@ package com.example.backend.model;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -37,6 +39,11 @@ public class Indicateur {
     private LocalDateTime dateMesure;
     
     private String commentaire;
+    
+    @ManyToOne
+    @JoinColumn(name = "daily_report_id")
+    @JsonBackReference("dailyReport-indicators")
+    private DailyReport dailyReport;
     
     // Getters and Setters
     public Long getId() {
@@ -93,5 +100,13 @@ public class Indicateur {
     
     public void setCommentaire(String commentaire) {
         this.commentaire = commentaire;
+    }
+    
+    public DailyReport getDailyReport() {
+        return dailyReport;
+    }
+    
+    public void setDailyReport(DailyReport dailyReport) {
+        this.dailyReport = dailyReport;
     }
 }

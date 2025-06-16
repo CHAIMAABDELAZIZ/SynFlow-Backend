@@ -140,28 +140,12 @@ public class PhaseResource {
     @PUT
     @Path("/{id}")  
     public Response updatePhase(@PathParam("id") Long id, Phase phase) {
-        try {
-            System.out.println("=== PHASE UPDATE REQUEST ===");
-            System.out.println("Updating phase ID: " + id);
-            System.out.println("Update data: " + phase);
-            
-            return phaseService.update(id, phase)
-                    .map(updated -> {
-                        System.out.println("Successfully updated phase " + id);
-                        return Response.ok(new ApiResponse<>(true, updated, 
-                            String.format("Phase with ID %d updated successfully", id))).build();
-                    })
-                    .orElse(Response.status(Response.Status.NOT_FOUND)
-                            .entity(new ApiResponse<>(false, null, 
-                                String.format("Phase with ID %d not found", id))).build());
-        } catch (Exception e) {
-            System.err.println("=== PHASE UPDATE ERROR ===");
-            System.err.println("Error updating phase " + id + ": " + e.getMessage());
-            e.printStackTrace();
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(new ApiResponse<>(false, null, "Error updating phase: " + e.getMessage()))
-                    .build();
-        }
+        return phaseService.update(id, phase)
+                .map(updated -> Response.ok(new ApiResponse<>(true, updated, 
+                    String.format("Phase with ID %d updated successfully", id))).build())
+                .orElse(Response.status(Response.Status.NOT_FOUND)
+                        .entity(new ApiResponse<>(false, null, 
+                            String.format("Phase with ID %d not found", id))).build());
     }
 
     @DELETE

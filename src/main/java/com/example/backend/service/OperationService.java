@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.backend.model.Operation;
+import com.example.backend.repository.DailyReportRepository;
 import com.example.backend.repository.OperationRepository;
 import com.example.backend.repository.PhaseRepository;
 import com.example.backend.repository.TypeOperationRepository;
@@ -29,6 +30,9 @@ public class OperationService {
     
     @Autowired
     private UtilisateurRepository utilisateurRepository;
+    
+    @Autowired
+    private DailyReportRepository dailyReportRepository;
 
     public List<Operation> findAll() {
         return operationRepository.findAll();
@@ -98,6 +102,12 @@ public class OperationService {
         return operationRepository.save(operation);
     }
 
+    public List<Operation> findByDailyReport(Long dailyReportId) {
+        return dailyReportRepository.findById(dailyReportId)
+                .map(dailyReport -> operationRepository.findByDailyReport(dailyReport))
+                .orElse(List.of());
+    }
+
     public Optional<Operation> update(Long id, Operation operationData) {
         return operationRepository.findById(id)
                 .map(operation -> {
@@ -128,6 +138,12 @@ public class OperationService {
 
                     if (operationData.getStatut() != null) {
                         operation.setStatut(operationData.getStatut());
+                    }
+                    
+                    // Handle DailyReport relationship
+                    if (operationData.getDailyReport() != null && operationData.getDailyReport().getId() != null) {
+                        dailyReportRepository.findById(operationData.getDailyReport().getId())
+                                .ifPresent(operation::setDailyReport);
                     }
 
                     // Ne pas mettre à jour createdBy et createdAt
