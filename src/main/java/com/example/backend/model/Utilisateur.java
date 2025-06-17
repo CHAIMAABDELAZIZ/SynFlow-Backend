@@ -21,7 +21,8 @@ public class Utilisateur {
         ADMIN("admin"),
         SUPERVISOR("supervisor"),
         ENGINEER("engineer"),
-        VIEWER("viewer");
+        VIEWER("viewer"),
+        MANAGER("manager");
         
         private final String label;
         

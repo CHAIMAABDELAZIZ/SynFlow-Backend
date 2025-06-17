@@ -4,6 +4,7 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.springframework.stereotype.Component;
 
 import com.example.backend.rest.DailyReportResource;
+import com.example.backend.rest.DashboardResource;
 import com.example.backend.rest.ForageResource;
 import com.example.backend.rest.OperationResource;
 import com.example.backend.rest.PhaseResource;
@@ -28,7 +29,8 @@ public class JerseyConfig extends ResourceConfig {
         register(PhaseResource.class);
         register(OperationResource.class);
         register(DailyReportResource.class);
-        register(ProblemeResource.class); // Make sure this is registered
+        register(ProblemeResource.class);
+        register(DashboardResource.class); // Add dashboard resource
         
         // Enable CORS
         register(CorsFilter.class);
